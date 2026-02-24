@@ -5,27 +5,33 @@ import { UpdateBoardsDto } from './dto/update-boards.dto';
 
 @Injectable()
 export class BoardsService {
-    constructor(private prisma: PrismaService) {}
+constructor(private readonly prismaService: PrismaService) {}
 
    async create(dto: CreateBoardDto) {
-    return this.prismaService.user.create({
+    return this.prismaService.board.create({
       data: dto,
     });
   }
 
-
     async findAll() {
-        return this.prisma.board.findMany();
+        return this.prismaService.board.findMany();
     }
 
     async findOne(id: string) {
-        return this.prisma.board.findUnique({
+        return this.prismaService.board.findUnique({
             where: { id },
         });
     }
 
+    async update(id: string, updateBoardDto: UpdateBoardsDto) {
+    return this.prismaService.board.update({
+      where: { id },
+      data: updateBoardDto,
+    });
+  }
+
     async remove(id: string) {
-        return this.prisma.board.delete({
+        return this.prismaService.board.delete({
             where: { id },
         });
     }
