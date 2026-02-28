@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TaskStatus } from 'src/generated/prisma/enums';
 
 @Injectable()
 export class TasksService {
@@ -11,15 +12,15 @@ export class TasksService {
     return await this.prisma.task.create({ data: dto });
   }
 
- async findAll() {
-  return await this.prisma.task.findMany({
+async findAll(status?: TaskStatus) {
+  return this.prisma.task.findMany({
+    where: status ? { status } : {},
     include: {
-      board: true,  // включаем доску
-      user: true,   // включаем пользователя
+      board: true,
+      user: true,
     },
   });
 }
-
   
 
   async update(id: string, updateTaskDto: UpdateTaskDto) {
