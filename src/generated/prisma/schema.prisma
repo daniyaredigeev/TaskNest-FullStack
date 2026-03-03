@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider     = "prisma-client-js"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Таблица: User
+model User {
+  id        String   @id @default(uuid()) // Уникальный идентификатор пользователя
+  name      String
+  email     String   @unique
+  password  String // Хранение пароля в виде хэша для безопасности
+  createdAt DateTime @default(now()) // Дата и время создания пользователя
+  updatedAt DateTime @updatedAt // Дата и время последнего обновления пользователя
+  tasks     Task[] // Один пользователь может иметь много задач
+}
+
+// Таблица: Board
+model Board {
+  id          String   @id @default(uuid()) // Уникальный идентификатор доски
+  title       String // Название доски
+  createdAt   DateTime @default(now()) // Дата создания
+  tasks       Task[] // Связь One-to-Many с задачами
+  description String? // Опциональное описание доски
+}
+
+// Enum для статусов задач
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+// Таблица: Task
+model Task {
+  id          String     @id @default(uuid()) // Уникальный идентификатор задачи
+  title       String
+  description String? // Опциональное описание
+  status      TaskStatus @default(TODO) // Статус задачи
+  createdAt   DateTime   @default(now()) // Дата создания
+
+  // Внешние ключи
+  boardId String
+  userId  String
+
+  // Связи
+  board Board @relation(fields: [boardId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+}

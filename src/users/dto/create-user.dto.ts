@@ -1,13 +1,19 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger'; // Импорт декоратора
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEmail, IsString, MinLength } from "class-validator";
 
 export class CreateUserDto {
-  @ApiProperty() // Добавляем для отображения в Swagger
-  @IsEmail()
-  email: string;
+    @ApiProperty({ description: 'Email', example: 'user@example.com' })
+    @IsEmail()
+    email: string;
 
-  @ApiProperty() // Добавляем для отображения в Swagger
-  @IsString()
-  @MinLength(2)
-  name: string;
+    @ApiProperty({ description: 'Имя', example: 'Иван Иванов' })
+    @IsString()
+    @MinLength(2)
+    name: string;
+
+    @ApiProperty({ description: 'Пароль', example: 'password123' })
+    @IsString()
+    @MinLength(6)
+    password: string;
+
 }

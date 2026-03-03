@@ -3,17 +3,27 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BoardsModule } from './boards/boards.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { PrismaService } from './prisma/prisma.service';
-
 import { UsersModule } from './users/users.module';
-import { MoviesModule } from './movies/movies.module';
-import { ReviewsModule } from './reviews/reviews.module';
-import { TasksModule } from './–no-spec/tasks/tasks.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+
+
 
 @Module({
-  imports: [BoardsModule, PrismaModule, UsersModule, MoviesModule, ReviewsModule, TasksModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    PrismaModule,
+    UsersModule,
+    BoardsModule,
+    TasksModule,
+    AuthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService],
 })
 export class AppModule {}
+
+
