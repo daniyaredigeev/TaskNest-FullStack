@@ -7,47 +7,46 @@ import {
   Param,
   Delete,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskStatus } from './enums/task-status.enum';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'src/auth/enums/role.enum';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
+import { Authorization } from 'src/auth/decorators/authoration.decorator';
 
 @ApiTags('Задачи (Tasks)')
-@ApiBearerAuth() // Показывает в Swagger, что нужен токен
+@ApiBearerAuth()
+@Authorization() // Твой декоратор для защиты маршрутов
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
-  // 1. GET /tasks — Любой авторизованный пользователь (Guard глобальный)
   @Get()
-  @ApiOperation({ summary: 'Получить все задачи' })
-  @ApiQuery({
-    name: 'status',
-    enum: TaskStatus,
-    required: false,
-    description: 'Фильтрация задач по статусу',
-  })
-  findAll(@Query('status') status?: TaskStatus) {
-    return this.tasksService.findAll(status);
+  @ApiOperation({ summary: 'Получить задачи (Админ видит все, юзер — свои)' })
+  @ApiQuery({ name: 'status', enum: TaskStatus, required: false })
+  findAll(
+    @Authorized() user: any, // Получаем весь объект юзера (id + role)
+    @Query('status') status?: TaskStatus
+  ) {
+    return this.tasksService.findAll(user, status);
   }
 
-  // 2. GET /tasks/:id — Любой авторизованный пользователь
   @Get(':id')
-  @ApiOperation({ summary: 'Получить задачу по ID' })
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(id);
+  @ApiOperation({ summary: 'Получить конкретную задачу' })
+  findOne(@Param('id') id: string, @Authorized() user: any) {
+    return this.tasksService.findOne(id, user);
   }
 
   @Post('create')
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Создать новую задачу' })
   create(
     @Body() createTaskDto: CreateTaskDto, 
-    @Authorized('id') userId: string // Шаг 2: берем ID из токена
+    @Authorized('id') userId: string 
   ) {
     return this.tasksService.create(createTaskDto, userId);
   }
@@ -57,7 +56,7 @@ export class TasksController {
   update(
     @Param('id') id: string,
     @Body() updateTaskDto: UpdateTaskDto,
-    @Authorized() user: any // Передаем весь объект user для проверки роли и id
+    @Authorized() user: any 
   ) {
     return this.tasksService.update(id, updateTaskDto, user);
   }
@@ -70,6 +69,4 @@ export class TasksController {
   ) {
     return this.tasksService.remove(id, user);
   }
-
-  //можно добавить get/me
 }

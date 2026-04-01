@@ -120,6 +120,24 @@ export class AuthService {
   return user;
 }
 
+async getMe(id: string) {
+  const user = await this.prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,   // ОБЯЗАТЕЛЬНО ДОБАВЛЯЕМ
+      email: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    throw new UnauthorizedException('Пользователь не найден');
+  }
+
+  return user;
+}
+
 
   private auth(res: Response, id: string) {
     const { accessToken, refreshToken } = this.generateTokens(id);
